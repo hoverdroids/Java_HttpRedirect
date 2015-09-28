@@ -1,6 +1,8 @@
-package com.hoverdroids.httpstatus;
+package com.hoverdroids.java.httpredirect;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
  
@@ -8,35 +10,14 @@ public class Main {
 	
     public static void main(String args[]) throws Exception {
  
-        String[] hostList = {
-        		"http://crunchify.com",
-        		"http://yahoo.com",
-                "http://www.ebay.com",
-                "http://google.com",
-                "http://www.example.co",
-                "http://paypal.com",
-                "http://bing.com/", "http://techcrunch.com/",
-                "http://mashable.com/", "http://thenextweb.com/",
-                "http://www.wordpress.com/", "http://wordpress.org/",
-                "http://example.com/", "http://sjsu.edu/",
-                "http://ebay.co.uk/", "http://google.co.uk/",
-                "http://www.wikipedia.org/",
-                "http://en.wikipedia.org/wiki/Main_Page",
-                "http://api.edmunds.com/api/vehicle/v2/rolls-royce/models?fmt=json&api_key=38a85swhgh57f4smha9vevn8",
-                "http://www.edmunds.com/"};
- 
-        for (int i = 0; i < hostList.length; i++) {
- 
-            String url = hostList[i];
-            String status = getStatus(url);
- 
-            System.out.println(url + "\t\tStatus:" + status);
-        } 
+        String url = "http://twitter.com";
+        
+        System.out.println("Url:" + url);
+        getStatus(url);
     }
  
-    public static String getStatus(String siteUrl) throws IOException {
+    public static void getStatus(String siteUrl) throws IOException {
     	
-        String result = "";
         try {
         	//Create a connection to the target url
             URL url = new URL(siteUrl);
@@ -47,18 +28,20 @@ public class Main {
         	conn.addRequestProperty("Referer", "google.com");
         	
         	int status = conn.getResponseCode();
-        	if(status == HttpURLConnection.HTTP_OK){
-        		return "Green Code:" + status;
-        		
+        	System.out.println("Status:" + status);
+        	if(status == HttpURLConnection.HTTP_OK){        		
+        		getHtml(conn);
+        		return;
         	}else if (!(status == HttpURLConnection.HTTP_MOVED_TEMP
     			|| status == HttpURLConnection.HTTP_MOVED_PERM
     				|| status == HttpURLConnection.HTTP_SEE_OTHER)){
         		// normally, 3xx is redirect; anything else means error - for this simple example
-    			return "Red Code:" + status;
+    			getHtml(conn);
+    			return;
     		}
     		
         	//The request is being redirected...
-        	result = "Redirect Code:" + String.valueOf(status);
+        	System.out.println("Redirecting ... ");
         	
 			// get redirect url from "location" header field
 			String newUrl = conn.getHeaderField("Location");
@@ -75,13 +58,32 @@ public class Main {
 			
 			status = conn.getResponseCode();
 			
-			result += ",newUrl:" + newUrl 
-					+ ",status:" + (status == HttpURLConnection.HTTP_OK ? "Green" : "Red")
-					+ ",code:" + status;
-    	
+			System.out.println("NewUrl:" + newUrl);
+			getHtml(conn);
+			
         } catch (Exception e) {
-            result = "RED";
+            System.out.println("Houston, we had a problem:" + e.getMessage());
         }
-        return result;
     } 
+    
+    private static void getHtml(HttpURLConnection conn){
+    	
+    	try {
+			BufferedReader in = new BufferedReader(
+			        new InputStreamReader(conn.getInputStream()));
+			
+			String inputLine;
+			StringBuffer html = new StringBuffer();
+			
+			while ((inputLine = in.readLine()) != null) {
+				html.append(inputLine);
+			}
+			in.close();
+			
+			System.out.println("Html:" + html.toString());
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 }
