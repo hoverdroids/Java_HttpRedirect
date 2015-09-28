@@ -1,0 +1,1 @@
+This is a sample Java project that shows how to redirect an HttpURLConnection
