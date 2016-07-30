@@ -10,7 +10,8 @@ public class Main {
 	
     public static void main(String args[]) throws Exception {
  
-        String url = "http://twitter.com";
+        String url = "http://api.edmunds.com/api/vehicle/v2/alfa-romeo?api_key=38a85swhgh57f4smha9vevn8&fmt=json";
+        		//"http://twitter.com";
         
         System.out.println("Url:" + url);
         getStatus(url);
